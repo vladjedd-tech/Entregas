@@ -3,13 +3,15 @@
 Para transformar este projeto em um APK para Android, você tem duas opções:
 
 ## Opção 1: Automático via GitHub (Recomendado)
-Eu já configurei um "Workflow" no seu projeto. Quando você exportar para o GitHub, o APK será gerado automaticamente!
+Eu já corrigi as versões do aplicativo e configurei o sistema para gerar o APK sozinho.
+Siga estes passos:
 
-1. Exporte o projeto para o seu **GitHub**.
-2. No seu repositório no GitHub, clique na aba **"Actions"**.
-3. Você verá um item chamado **"Build Android APK"**.
-4. Se ele não começar sozinho, clique nele e depois em "Run workflow".
-5. Ao finalizar (o ícone ficará verde), clique no nome do processo e role até o final da página para baixar o arquivo **"app-debug"** (que é o seu APK).
+1. Clique em **"Export to GitHub"** aqui no AI Studio para enviar as correções que acabei de fazer.
+2. No seu GitHub, vá na aba **"Actions"**.
+3. Clique em **"Build Android APK"**.
+4. Clique em **"Run workflow"** (Botão no lado direito) -> **"Run workflow"** (Botão verde).
+5. Quando o círculo ficar verde com um "check", clique no nome do processo ("Build Android APK").
+6. No final da página (seção **Artifacts**), clique em **"app-debug"** para baixar seu APK!
 
 ## Opção 2: Manual no seu Computador
 Siga estes passos se preferir compilar localmente:
