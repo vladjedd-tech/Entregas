@@ -13,6 +13,8 @@ Siga estes passos:
 5. Quando o círculo ficar verde com um "check", clique no nome do processo ("Build Android APK").
 6. No final da página (seção **Artifacts**), clique em **"app-debug"** para baixar seu APK!
 
+> **Nota sobre o GPS:** Eu adicionei o plugin oficial do Capacitor e configurei o GitHub para injetar automaticamente as permissões no APK. Agora, ao abrir o app no Android pela primeira vez, ele deve pedir permissão para acessar sua localização.
+
 ## Opção 2: Manual no seu Computador
 Siga estes passos se preferir compilar localmente:
 

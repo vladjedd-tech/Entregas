@@ -21,6 +21,8 @@ import { HistoryView } from './components/HistoryView';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
 
+import { Geolocation } from '@capacitor/geolocation';
+
 export default function App() {
   const [pedidos, setPedidos] = useState<Pedido[]>(() => {
     const salvo = localStorage.getItem('entregas_pedidos');
@@ -35,21 +37,42 @@ export default function App() {
     localStorage.setItem('entregas_pedidos', JSON.stringify(pedidos));
   }, [pedidos]);
 
-  // Geolocalização do usuário
+  // Geolocalização do usuário (Usando Capacitor para melhor suporte nativo)
   useEffect(() => {
-    if ('geolocation' in navigator) {
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          setPosicaoAtual({
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude,
-          });
-        },
-        (err) => console.error('Erro ao pegar GPS:', err),
-        { enableHighAccuracy: true }
-      );
-      return () => navigator.geolocation.clearWatch(watchId);
-    }
+    let watchId: string | null = null;
+
+    const startTracking = async () => {
+      try {
+        // Solicitar permissão explicitamente no Android/iOS
+        const permission = await Geolocation.requestPermissions();
+        if (permission.location === 'denied') {
+          console.error('Permissão de GPS negada');
+          return;
+        }
+
+        watchId = await Geolocation.watchPosition(
+          { enableHighAccuracy: true, timeout: 10000 },
+          (pos) => {
+            if (pos) {
+              setPosicaoAtual({
+                lat: pos.coords.latitude,
+                lng: pos.coords.longitude,
+              });
+            }
+          }
+        );
+      } catch (err) {
+        console.error('Erro ao iniciar rastreamento GPS:', err);
+      }
+    };
+
+    startTracking();
+
+    return () => {
+      if (watchId) {
+        Geolocation.clearWatch({ id: watchId });
+      }
+    };
   }, []);
 
   // Geocodificação automática de pedidos pendentes
