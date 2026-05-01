@@ -1,8 +1,20 @@
 # Como Gerar o seu APK
 
-Para transformar este projeto em um APK para Android, siga estes passos no seu computador:
+Para transformar este projeto em um APK para Android, você tem duas opções:
 
-## 1. Preparação
+## Opção 1: Automático via GitHub (Recomendado)
+Eu já configurei um "Workflow" no seu projeto. Quando você exportar para o GitHub, o APK será gerado automaticamente!
+
+1. Exporte o projeto para o seu **GitHub**.
+2. No seu repositório no GitHub, clique na aba **"Actions"**.
+3. Você verá um item chamado **"Build Android APK"**.
+4. Se ele não começar sozinho, clique nele e depois em "Run workflow".
+5. Ao finalizar (o ícone ficará verde), clique no nome do processo e role até o final da página para baixar o arquivo **"app-debug"** (que é o seu APK).
+
+## Opção 2: Manual no seu Computador
+Siga estes passos se preferir compilar localmente:
+
+### 1. Preparação
 Você precisará ter instalado:
 - **Node.js**
 - **Android Studio**
