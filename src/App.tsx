@@ -30,6 +30,7 @@ export default function App() {
   });
   const [abaAtiva, setAbaAtiva] = useState<string>('pedidos');
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [geocodificando, setGeocodificando] = useState(false);
   const [posicaoAtual, setPosicaoAtual] = useState<{ lat: number; lng: number } | null>(null);
 
   // Persistência
@@ -43,15 +44,17 @@ export default function App() {
 
     const startTracking = async () => {
       try {
-        // Solicitar permissão explicitamente no Android/iOS
-        const permission = await Geolocation.requestPermissions();
-        if (permission.location === 'denied') {
-          console.error('Permissão de GPS negada');
-          return;
+        // Tentar obter a posição uma vez primeiro para forçar permissão
+        const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+        if (pos) {
+          setPosicaoAtual({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
         }
 
         watchId = await Geolocation.watchPosition(
-          { enableHighAccuracy: true, timeout: 10000 },
+          { enableHighAccuracy: true, timeout: 20000 },
           (pos) => {
             if (pos) {
               setPosicaoAtual({
@@ -79,6 +82,7 @@ export default function App() {
   useEffect(() => {
     const pedidosSemGeo = pedidos.filter(p => !p.geocodificado && p.endereco);
     if (pedidosSemGeo.length > 0) {
+      setGeocodificando(true);
       const processarProximo = async () => {
         const p = pedidosSemGeo[0];
         const coords = await geocodificarEndereco(p.endereco);
@@ -89,9 +93,10 @@ export default function App() {
         ));
       };
       
-      // Delay pequeno para respeitar limites do Nominatim
       const timer = setTimeout(processarProximo, 1200);
       return () => clearTimeout(timer);
+    } else {
+      setGeocodificando(false);
     }
   }, [pedidos]);
 
@@ -132,8 +137,16 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-gray-50 pb-[70px]">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-blue-600">Entregas PB</h1>
+      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center h-[60px]">
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold text-blue-600">Entregas PB</h1>
+          {geocodificando && (
+            <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-0.5 rounded-full animate-pulse">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+              <span className="text-[10px] font-black text-blue-600 uppercase">Mapeando...</span>
+            </div>
+          )}
+        </div>
         
         {abaAtiva === 'pedidos' && pedidos.some(p => p.status !== 'ENTREGUE' && p.status !== 'CANCELADO') && (
           <button 

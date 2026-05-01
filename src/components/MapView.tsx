@@ -27,24 +27,36 @@ const icons = {
   USER: createIcon('#ef4444'), // Vermelho (Usuário)
 };
 
-function MapResizer() {
+function MapResizer({ points }: { points: [number, number][] }) {
   const map = useMap();
+  
   useEffect(() => {
     map.invalidateSize();
-  }, [map]);
+    if (points.length > 0) {
+      const bounds = L.latLngBounds(points);
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 16 });
+    }
+  }, [map, points]);
+
   return null;
 }
 
 export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps) {
   const defaultCenter: [number, number] = [-26.2238, -52.6719]; // Pato Branco center
 
-  const pedidosGeocodificados = useMemo(() => 
-    pedidos.filter(p => p.latitude && p.longitude && p.status === 'EM_ENTREGA'),
+  const pedidosFiltrados = useMemo(() => 
+    pedidos.filter(p => p.latitude && p.longitude && p.status !== 'ENTREGUE' && p.status !== 'CANCELADO'),
   [pedidos]);
+
+  const allPoints = useMemo(() => {
+    const points: [number, number][] = pedidosFiltrados.map(p => [p.latitude!, p.longitude!]);
+    if (posicaoAtual) points.push([posicaoAtual.lat, posicaoAtual.lng]);
+    return points;
+  }, [pedidosFiltrados, posicaoAtual]);
 
   // Calcular rota azul (Polyline)
   const rotaCoords = useMemo(() => {
-    const emEntrega = pedidos.filter(p => p.status === 'EM_ENTREGA' && p.latitude && p.longitude);
+    const emEntrega = pedidosFiltrados.filter(p => p.status === 'EM_ENTREGA');
     if (emEntrega.length < 1) return [];
 
     const coords: [number, number][] = [];
@@ -72,12 +84,12 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
     }
     
     return coords;
-  }, [pedidos, posicaoAtual]);
+  }, [pedidosFiltrados, posicaoAtual]);
 
   return (
     <div className="w-full h-full relative">
       <MapContainer
-        center={posicaoAtual ? [posicaoAtual.lat, posicaoAtual.lng] : defaultCenter}
+        center={defaultCenter}
         zoom={14}
         className="w-full h-full"
         zoomControl={false}
@@ -86,7 +98,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <MapResizer />
+        <MapResizer points={allPoints} />
 
         {posicaoAtual && (
           <Marker position={[posicaoAtual.lat, posicaoAtual.lng]} icon={icons.USER}>
@@ -94,7 +106,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
           </Marker>
         )}
 
-        {pedidosGeocodificados.map(p => (
+        {pedidosFiltrados.map(p => (
           <Marker 
             key={p.id} 
             position={[p.latitude!, p.longitude!]} 

@@ -2,6 +2,14 @@
 
 Para transformar este projeto em um APK para Android, você tem duas opções:
 
+## Importante: Novas Correções
+Eu fiz melhorias críticas no GPS e no Mapa:
+1. **GPS Nativo:** Agora o app usa o plugin oficial do celular para garantir que a localização funcione no APK.
+2. **Mapa Inteligente:** O mapa agora mostra **todos** os pedidos (pendentes em amarelo, na rota em azul) e ajusta o zoom automaticamente para que você veja todos os pontos ao mesmo tempo.
+3. **Indicador de Mapeamento:** No topo do app, aparecerá "Mapeando..." enquanto ele descobre as coordenadas dos novos pedidos (leva cerca de 1 segundo por pedido).
+
+**Para aplicar estas mudanças, você precisa clicar em "Export to GitHub" novamente e gerar um novo APK seguindo os passos da Opção 1.**
+
 ## Opção 1: Automático via GitHub (Recomendado)
 Eu já corrigi as versões do aplicativo e configurei o sistema para gerar o APK sozinho.
 Siga estes passos:
