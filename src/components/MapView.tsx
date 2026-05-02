@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Pedido } from '../types';
@@ -59,13 +59,23 @@ function MapController({
 
 export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps) {
   const defaultCenter: [number, number] = [-26.2238, -52.6719]; // Pato Branco center
-  const [roadPath, setRoadPath] = useState<[number, number][]>([]);
+  const [firstLegPath, setFirstLegPath] = useState<[number, number][]>([]);
+  const [remainingPath, setRemainingPath] = useState<[number, number][]>([]);
   const [isRouting, setIsRouting] = useState(false);
   const [autoFocus, setAutoFocus] = useState(true);
 
   const pedidosEmRota = useMemo(() => 
     pedidos.filter(p => p.latitude && p.longitude && p.status === 'EM_ENTREGA'),
   [pedidos]);
+
+  // Redefine o foco automático quando a lista de pedidos em rota muda (ex: ao entregar um pedido)
+  const lastCount = useRef(pedidosEmRota.length);
+  useEffect(() => {
+    if (pedidosEmRota.length !== lastCount.current) {
+      setAutoFocus(true);
+      lastCount.current = pedidosEmRota.length;
+    }
+  }, [pedidosEmRota.length]);
 
   // Identifica o PRÓXIMO pedido (usando vizinho mais próximo da posição atual)
   const proximoPedido = useMemo(() => {
@@ -118,17 +128,31 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
   // Efeito para buscar a rota real nas ruas
   useEffect(() => {
     if (waypoints.length < 2) {
-      setRoadPath([]);
+      setFirstLegPath([]);
+      setRemainingPath([]);
       return;
     }
 
     let isMounted = true;
     const fetchRoute = async () => {
       setIsRouting(true);
-      const path = await getRoadRoute(waypoints);
-      if (isMounted) {
-        setRoadPath(path.map(p => [p.lat, p.lng]));
-        setIsRouting(false);
+      try {
+        // Perna 1: Pato Branco -> Próximo
+        const leg1 = await getRoadRoute([waypoints[0], waypoints[1]]);
+        
+        // Perna Restante
+        let rest: {lat: number, lng: number}[] = [];
+        if (waypoints.length > 2) {
+          rest = await getRoadRoute(waypoints.slice(1));
+        }
+
+        if (isMounted) {
+          setFirstLegPath(leg1.map(p => [p.lat, p.lng]));
+          setRemainingPath(rest.map(p => [p.lat, p.lng]));
+          setIsRouting(false);
+        }
+      } catch (err) {
+        if (isMounted) setIsRouting(false);
       }
     };
 
@@ -185,24 +209,27 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
           </Marker>
         ))}
 
-        {roadPath.length > 1 && (
+        {remainingPath.length > 1 && (
           <Polyline 
-            positions={roadPath} 
+            positions={remainingPath} 
             color="#3b82f6" 
-            weight={5} 
-            opacity={0.8}
+            weight={4} 
+            opacity={0.6}
             dashArray="1, 12"
             lineCap="round"
           />
         )}
-      </MapContainer>
 
-      {isRouting && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[40] bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border border-blue-100 flex items-center gap-2">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
-          <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Calculando Trajeto Real...</span>
-        </div>
-      )}
+        {firstLegPath.length > 1 && (
+          <Polyline 
+            positions={firstLegPath} 
+            color="#2563eb" 
+            weight={6} 
+            opacity={1}
+            lineCap="round"
+          />
+        )}
+      </MapContainer>
 
       <div className="absolute bottom-6 right-6 z-[40] flex flex-col gap-2">
         <button
@@ -216,21 +243,6 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
         >
           <Crosshair className={cn("w-6 h-6", autoFocus && "animate-pulse")} />
         </button>
-
-        <div className="bg-white/90 backdrop-blur p-3 rounded-2xl shadow-lg border border-gray-100 space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-amber-500" />
-            <span className="text-[10px] font-bold text-gray-600">Pendente</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500" />
-            <span className="text-[10px] font-bold text-gray-600">Em Rota</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="text-[10px] font-bold text-gray-600">Entregue</span>
-          </div>
-        </div>
       </div>
     </div>
   );
