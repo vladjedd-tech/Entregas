@@ -1,8 +1,9 @@
 import { Pedido, StatusPedido } from '../types';
 import { calcularDistancia } from '../services/geoService';
-import { cn, formatarBRL } from '../lib/utils';
-import { MapPin, Navigation2, CheckCircle2, Package, Clock, Info } from 'lucide-react';
-import { useMemo } from 'react';
+import { getDistanceMatrix } from '../services/routingService';
+import { cn } from '../lib/utils';
+import { MapPin, Navigation2, CheckCircle2, Package, Clock, Info, Zap } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
 
 interface RouteViewProps {
   pedidos: Pedido[];
@@ -12,41 +13,86 @@ interface RouteViewProps {
 }
 
 export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: RouteViewProps) {
-  const emEntrega = pedidos.filter(p => p.status === 'EM_ENTREGA');
+  const emEntrega = useMemo(() => pedidos.filter(p => p.status === 'EM_ENTREGA'), [pedidos]);
+  const [rotaOrdenada, setRotaOrdenada] = useState<(Pedido & { distancia?: number; road?: boolean })[]>([]);
+  const [otimizando, setOtimizando] = useState(false);
 
-  const rotaOrdenada = useMemo(() => {
-    if (!posicaoAtual) return emEntrega;
-
-    const items = [...emEntrega];
-    let currentLat = posicaoAtual.lat;
-    let currentLng = posicaoAtual.lng;
-    const sorted: (Pedido & { distancia?: number })[] = [];
-
-    // Algoritmo Vizinho Mais Próximo (Simples)
-    while (items.length > 0) {
-      let closestIdx = 0;
-      let minDistance = Infinity;
-
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].latitude && items[i].longitude) {
-          const dist = calcularDistancia(currentLat, currentLng, items[i].latitude!, items[i].longitude!);
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestIdx = i;
-          }
-        }
-      }
-
-      const [next] = items.splice(closestIdx, 1);
-      sorted.push({ ...next, distancia: minDistance === Infinity ? undefined : minDistance });
-      
-      if (next.latitude && next.longitude) {
-        currentLat = next.latitude!;
-        currentLng = next.longitude!;
-      }
+  // Efeito para calcular a melhor rota (Primeiro linha reta, depois via ruas)
+  useEffect(() => {
+    if (!posicaoAtual || emEntrega.length === 0) {
+      setRotaOrdenada(emEntrega);
+      return;
     }
 
-    return sorted;
+    let isMounted = true;
+
+    const calcularRota = async () => {
+      // 1. Cálculo Rápido (Linha Reta)
+      const itemsLinhareta = [...emEntrega];
+      let cLat = posicaoAtual.lat;
+      let cLng = posicaoAtual.lng;
+      const sortedLR: (Pedido & { distancia?: number; road?: boolean })[] = [];
+
+      while (itemsLinhareta.length > 0) {
+        let closestIdx = 0;
+        let minDistance = Infinity;
+        for (let i = 0; i < itemsLinhareta.length; i++) {
+          const d = calcularDistancia(cLat, cLng, itemsLinhareta[i].latitude!, itemsLinhareta[i].longitude!);
+          if (d < minDistance) { minDistance = d; closestIdx = i; }
+        }
+        const [next] = itemsLinhareta.splice(closestIdx, 1);
+        sortedLR.push({ ...next, distancia: minDistance });
+        cLat = next.latitude!; cLng = next.longitude!;
+      }
+      
+      if (isMounted) setRotaOrdenada(sortedLR);
+
+      // 2. Otimização Profunda (Via Ruas / OSRM)
+      // Fazemos isso apenas se tivermos uma quantidade razoável de pontos para não sobrecarregar
+      if (emEntrega.length > 0 && emEntrega.length <= 25) {
+        setOtimizando(true);
+        const points = [{ lat: posicaoAtual.lat, lng: posicaoAtual.lng }, ...emEntrega.map(p => ({ lat: p.latitude!, lng: p.longitude! }))];
+        const matrix = await getDistanceMatrix(points);
+
+        if (matrix && isMounted) {
+          const itemsEstrada = [...emEntrega];
+          const sortedRoad: (Pedido & { distancia?: number; road?: boolean })[] = [];
+          
+          let currentPointIdx = 0; // Índice na matriz (0 é a posição atual)
+          const visitedIdxs = new Set([0]);
+
+          while (sortedRoad.length < emEntrega.length) {
+            let nextPointIdx = -1;
+            let minD = Infinity;
+
+            for (let i = 1; i < points.length; i++) {
+              if (!visitedIdxs.has(i)) {
+                const d = matrix[currentPointIdx][i];
+                if (d < minD) { minD = d; nextPointIdx = i; }
+              }
+            }
+
+            if (nextPointIdx !== -1) {
+              visitedIdxs.add(nextPointIdx);
+              // O índice 'i' na matriz corresponde ao item em 'emEntrega' no índice 'i-1'
+              const pedido = itemsEstrada[nextPointIdx - 1];
+              sortedRoad.push({ ...pedido, distancia: minD, road: true });
+              currentPointIdx = nextPointIdx;
+            } else {
+              break;
+            }
+          }
+          
+          if (isMounted && sortedRoad.length === emEntrega.length) {
+            setRotaOrdenada(sortedRoad);
+          }
+        }
+        if (isMounted) setOtimizando(false);
+      }
+    };
+
+    calcularRota();
+    return () => { isMounted = false; };
   }, [emEntrega, posicaoAtual]);
 
   if (pedidos.length > 0 && emEntrega.length === 0) {
@@ -96,6 +142,13 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
           <p className="text-[10px] font-bold text-amber-700 uppercase">Aguardando sinal do GPS para ordenar por distância...</p>
         </div>
       )}
+      
+      {otimizando && (
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-3 animate-pulse">
+          <Zap className="w-5 h-5 text-blue-500 fill-blue-500" />
+          <p className="text-[10px] font-bold text-blue-700 uppercase">Otimizando trajeto via ruas (OSRM)...</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {rotaOrdenada.map((p, idx) => (
@@ -120,9 +173,13 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
                     )}
                   </div>
                   {p.distancia !== undefined && (
-                    <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
-                      {p.distancia < 1 ? `${(p.distancia * 1000).toFixed(0)}m` : `${p.distancia.toFixed(1)}km`}
-                    </span>
+                    <div className={cn(
+                      "flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full transition-colors",
+                      p.road ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-500"
+                    )}>
+                      {p.road && <Zap className="w-2.5 h-2.5 fill-current" />}
+                      <span>{p.distancia < 1 ? `${(p.distancia * 1000).toFixed(0)}m` : `${p.distancia.toFixed(1)}km`}</span>
+                    </div>
                   )}
                 </div>
 

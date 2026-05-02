@@ -38,23 +38,34 @@ export default function App() {
     localStorage.setItem('entregas_pedidos', JSON.stringify(pedidos));
   }, [pedidos]);
 
-  // Geolocalização do usuário (Usando Capacitor para melhor suporte nativo)
+  // Geolocalização do usuário (Reforçada para atualização frequente)
   useEffect(() => {
     let watchId: string | null = null;
+    let fallbackInterval: number | null = null;
 
-    const startTracking = async () => {
+    const updatePosition = async () => {
       try {
-        // Tentar obter a posição uma vez primeiro para forçar permissão
-        const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+        const pos = await Geolocation.getCurrentPosition({ 
+          enableHighAccuracy: true,
+          timeout: 10000 
+        });
         if (pos) {
           setPosicaoAtual({
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           });
         }
+      } catch (err) {
+        console.warn('Silently failed to get one-shot position', err);
+      }
+    };
+
+    const startTracking = async () => {
+      try {
+        await updatePosition();
 
         watchId = await Geolocation.watchPosition(
-          { enableHighAccuracy: true, timeout: 20000 },
+          { enableHighAccuracy: true, timeout: 10000 },
           (pos) => {
             if (pos) {
               setPosicaoAtual({
@@ -64,6 +75,9 @@ export default function App() {
             }
           }
         );
+
+        // Forçar atualização a cada 1 segundo como solicitado pelo usuário
+        fallbackInterval = window.setInterval(updatePosition, 1000);
       } catch (err) {
         console.error('Erro ao iniciar rastreamento GPS:', err);
       }
@@ -72,9 +86,8 @@ export default function App() {
     startTracking();
 
     return () => {
-      if (watchId) {
-        Geolocation.clearWatch({ id: watchId });
-      }
+      if (watchId) Geolocation.clearWatch({ id: watchId });
+      if (fallbackInterval) window.clearInterval(fallbackInterval);
     };
   }, []);
 
