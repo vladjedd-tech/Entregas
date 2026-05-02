@@ -113,7 +113,12 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
 
               <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm active:bg-gray-50 transition-colors">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-bold text-gray-900 truncate flex-1" onClick={() => onSelect(p)}>{p.nome}</h3>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <h3 className="font-bold text-gray-900 truncate" onClick={() => onSelect(p)}>{p.nome}</h3>
+                    {p.geocodificado && (!p.latitude || !p.longitude) && (
+                      <span className="text-red-500 text-[8px] font-black uppercase mt-0.5">Endereço não localizado</span>
+                    )}
+                  </div>
                   {p.distancia !== undefined && (
                     <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
                       {p.distancia < 1 ? `${(p.distancia * 1000).toFixed(0)}m` : `${p.distancia.toFixed(1)}km`}

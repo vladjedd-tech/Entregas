@@ -44,28 +44,27 @@ function MapResizer({ points }: { points: [number, number][] }) {
 export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps) {
   const defaultCenter: [number, number] = [-26.2238, -52.6719]; // Pato Branco center
 
-  const pedidosFiltrados = useMemo(() => 
-    pedidos.filter(p => p.latitude && p.longitude && p.status !== 'ENTREGUE' && p.status !== 'CANCELADO'),
+  const pedidosEmRota = useMemo(() => 
+    pedidos.filter(p => p.latitude && p.longitude && p.status === 'EM_ENTREGA'),
   [pedidos]);
 
   const allPoints = useMemo(() => {
-    const points: [number, number][] = pedidosFiltrados.map(p => [p.latitude!, p.longitude!]);
+    const points: [number, number][] = pedidosEmRota.map(p => [p.latitude!, p.longitude!]);
     if (posicaoAtual) points.push([posicaoAtual.lat, posicaoAtual.lng]);
     return points;
-  }, [pedidosFiltrados, posicaoAtual]);
+  }, [pedidosEmRota, posicaoAtual]);
 
   // Calcular rota azul (Polyline)
   const rotaCoords = useMemo(() => {
-    const emEntrega = pedidosFiltrados.filter(p => p.status === 'EM_ENTREGA');
-    if (emEntrega.length < 1) return [];
+    if (pedidosEmRota.length < 1) return [];
 
     const coords: [number, number][] = [];
     if (posicaoAtual) coords.push([posicaoAtual.lat, posicaoAtual.lng]);
 
     // Ordenar similar ao RouteView
-    let currentLat = posicaoAtual?.lat || emEntrega[0].latitude!;
-    let currentLng = posicaoAtual?.lng || emEntrega[0].longitude!;
-    const items = [...emEntrega];
+    let currentLat = posicaoAtual?.lat || pedidosEmRota[0].latitude!;
+    let currentLng = posicaoAtual?.lng || pedidosEmRota[0].longitude!;
+    const items = [...pedidosEmRota];
     
     while (items.length > 0) {
       let closestIdx = 0;
@@ -84,7 +83,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
     }
     
     return coords;
-  }, [pedidosFiltrados, posicaoAtual]);
+  }, [pedidosEmRota, posicaoAtual]);
 
   return (
     <div className="w-full h-full relative">
@@ -106,11 +105,11 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
           </Marker>
         )}
 
-        {pedidosFiltrados.map(p => (
+        {pedidosEmRota.map(p => (
           <Marker 
             key={p.id} 
             position={[p.latitude!, p.longitude!]} 
-            icon={icons[p.status]}
+            icon={icons.EM_ENTREGA}
           >
             <Popup>
               <div className="p-1">

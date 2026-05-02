@@ -11,40 +11,100 @@ function setCache(cache: CoordenadasCache) {
   localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
 }
 
-export async function geocodificarEndereco(endereco: string): Promise<{ lat: number; lng: number } | null> {
+export async function geocodificarEndereco(enderecoOriginal: string): Promise<{ lat: number; lng: number } | null> {
   const cache = getCache();
   
-  if (cache[endereco]) {
-    return cache[endereco];
+  if (cache[enderecoOriginal]) {
+    return cache[enderecoOriginal];
   }
 
-  try {
-    // Nominatim requer um delay entre requisições e um User-Agent
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(endereco)}&limit=1`;
-    const response = await fetch(url, {
-      headers: {
-        'Accept-Language': 'pt-BR',
+  // 1. Extração do Endereço Essencial (Rua + Número)
+  const extrairEnderecoPuro = (txt: string) => {
+    // 1. Pega apenas o que vem antes da primeira vírgula ou traço (geralmente Rua e Número)
+    let base = txt.split(/[,\-]/)[0].trim();
+    
+    // 2. Limpeza de termos de complemento que poluem a busca
+    base = base
+      .replace(/(?:apto|apartamento|sala|bloco|bl|fundo|casa|sobrado|lote|lt|qd|quadra|esquina|km|sala|fundos|loja)\.?\s*\d*[a-z0-9]*/gi, '')
+      .replace(/[.\(\)]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    return base;
+  };
+
+  const enderecoPuro = extrairEnderecoPuro(enderecoOriginal);
+  const anchorLat = -26.2268;
+  const anchorLng = -52.6713;
+  const cidadeEstado = "Pato Branco, PR";
+
+  // Motor 1: Photon (Extremamente tolerante a erros de digitação)
+  const buscarPhoton = async (q: string) => {
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1&lat=${anchorLat}&lon=${anchorLng}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data?.features?.length > 0) {
+        const [lng, lat] = data.features[0].geometry.coordinates;
+        return { lat, lng };
       }
-    });
+      return null;
+    } catch { return null; }
+  };
 
-    if (!response.ok) throw new Error('Falha na geocodificação');
+  // Motor 2: Nominatim (Base de dados oficial do OSM)
+  const buscarNominatim = async (q: string) => {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&countrycodes=br`;
+      const response = await fetch(url, { 
+        headers: { 'User-Agent': 'Logistica_PatoBranco_v7', 'Accept-Language': 'pt-BR' } 
+      });
+      const data = await response.json();
+      if (data?.length > 0) {
+        return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+      }
+      return null;
+    } catch { return null; }
+  };
 
-    const data = await response.json();
+  const tentarTodos = async (q: string) => {
+    let res = await buscarPhoton(q);
+    if (!res) res = await buscarNominatim(q);
+    return res;
+  };
 
-    if (data && data.length > 0) {
-      const coords = {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon)
-      };
+  try {
+    console.log(`Geocodificando: "${enderecoOriginal}" -> Base: "${enderecoPuro}"`);
 
-      // Atualizar cache
-      const updatedCache = { ...cache, [endereco]: coords };
+    // Tenta 1: "Rua Nome 123, Pato Branco, PR"
+    let coords = await tentarTodos(`${enderecoPuro}, ${cidadeEstado}`);
+
+    // Tenta 2: Se falhar, tenta apenas a rua (remove números do final) - para pegar o meio da rua
+    if (!coords) {
+      const soRua = enderecoPuro.replace(/\d+$/, '').trim();
+      if (soRua !== enderecoPuro && soRua.length > 3) {
+        coords = await tentarTodos(`${soRua}, ${cidadeEstado}`);
+      }
+    }
+
+    // Tenta 3: Se ainda falhar, tenta o original sanitizado (caso o usuário tenha colocado a cidade de forma estranha)
+    if (!coords) {
+      coords = await tentarTodos(`${enderecoPuro}`);
+    }
+
+    // Fallback: Se NADA der certo, coloca no centro de Pato Branco para aparacer na lista/mapa
+    if (!coords) {
+      console.warn(`GPS não localizou: ${enderecoOriginal}. Usando centro da cidade.`);
+      coords = { lat: anchorLat, lng: anchorLng };
+    }
+
+    if (coords) {
+      const updatedCache = { ...cache, [enderecoOriginal]: coords };
       setCache(updatedCache);
-
       return coords;
     }
   } catch (error) {
-    console.error('Erro ao geocodificar:', endereco, error);
+    console.error('Falha crítica no GPS:', error);
   }
 
   return null;

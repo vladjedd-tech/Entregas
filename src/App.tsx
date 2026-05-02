@@ -80,17 +80,27 @@ export default function App() {
 
   // Geocodificação automática de pedidos pendentes
   useEffect(() => {
+    // Busca apenas pedidos que ainda NÃO foram processados pelo GPS
     const pedidosSemGeo = pedidos.filter(p => !p.geocodificado && p.endereco);
+    
     if (pedidosSemGeo.length > 0) {
       setGeocodificando(true);
       const processarProximo = async () => {
         const p = pedidosSemGeo[0];
-        const coords = await geocodificarEndereco(p.endereco);
-        setPedidos(prev => prev.map(item => 
-          item.id === p.id 
-            ? { ...item, latitude: coords?.lat, longitude: coords?.lng, geocodificado: true } 
-            : item
-        ));
+        try {
+          const coords = await geocodificarEndereco(p.endereco);
+          setPedidos(prev => prev.map(item => 
+            item.id === p.id 
+              ? { ...item, latitude: coords?.lat, longitude: coords?.lng, geocodificado: true } 
+              : item
+          ));
+        } catch (error) {
+          console.error(`Falha técnica ao mapear ${p.id}:`, error);
+          // Mesmo se falhar, marca como geocodificado para não tentar de novo infinitamente
+          setPedidos(prev => prev.map(item => 
+            item.id === p.id ? { ...item, geocodificado: true } : item
+          ));
+        }
       };
       
       const timer = setTimeout(processarProximo, 1200);

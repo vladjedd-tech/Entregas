@@ -105,7 +105,12 @@ export function OrderList({ pedidos, onSelect, onUpdateStatus }: OrderListProps)
               
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-start mb-1">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">#{p.numeroPedido}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">#{p.numeroPedido}</span>
+                    {p.geocodificado && (!p.latitude || !p.longitude) && (
+                      <span className="bg-red-50 text-red-500 text-[8px] font-black uppercase px-1.5 rounded-sm border border-red-100">Sem GPS</span>
+                    )}
+                  </div>
                   <div className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold uppercase", getBadgeClass(p.status))}>
                     {p.status.replace('_', ' ')}
                   </div>
