@@ -162,7 +162,7 @@ export default function App() {
     <div className="flex flex-col min-h-[100dvh] bg-gray-50 pb-[70px]">
       <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center h-[60px]">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-blue-600">Entregas PB</h1>
+          <h1 className="text-xl font-bold text-blue-600">Entregas Sexta Beer</h1>
           {geocodificando && (
             <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-0.5 rounded-full animate-pulse">
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />

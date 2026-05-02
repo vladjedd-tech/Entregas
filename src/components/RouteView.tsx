@@ -123,13 +123,13 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
   }
 
   return (
-    <div className="p-4 space-y-6 overflow-hidden">
+    <div className="p-4 space-y-6 w-full max-w-full">
       <div className="flex justify-between items-center bg-blue-600 p-6 rounded-[32px] text-white shadow-xl shadow-blue-200">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="text-2xl font-black mb-1 truncate">Minha Rota</h2>
           <p className="text-blue-100 text-[10px] font-medium uppercase tracking-widest">{rotaOrdenada.length} entregas pendentes</p>
         </div>
-        <div className="p-3 bg-blue-500 rounded-2xl rotate-3 shrink-0">
+        <div className="p-3 bg-blue-500 rounded-2xl rotate-3 shrink-0 ml-2">
           <Navigation2 className="w-6 h-6 fill-white" />
         </div>
       </div>
@@ -143,13 +143,6 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
         </div>
       )}
       
-      {otimizando && (
-        <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-3 animate-pulse">
-          <Zap className="w-5 h-5 text-blue-500 fill-blue-500" />
-          <p className="text-[10px] font-bold text-blue-700 uppercase">Otimizando trajeto via ruas (OSRM)...</p>
-        </div>
-      )}
-
       <div className="space-y-4">
         {rotaOrdenada.map((p, idx) => (
           <div key={p.id} className="relative">
@@ -164,26 +157,17 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
                 </div>
               </div>
 
-              <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm active:bg-gray-50 transition-colors">
-                <div className="flex justify-between items-start mb-2">
+              <div className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm active:bg-gray-50 transition-colors min-w-0">
+                <div className="flex justify-between items-start gap-2 mb-2">
                   <div className="flex flex-col flex-1 min-w-0">
                     <h3 className="font-bold text-gray-900 truncate" onClick={() => onSelect(p)}>{p.nome}</h3>
                     {p.geocodificado && (!p.latitude || !p.longitude) && (
                       <span className="text-red-500 text-[8px] font-black uppercase mt-0.5">Endereço não localizado</span>
                     )}
                   </div>
-                  {p.distancia !== undefined && (
-                    <div className={cn(
-                      "flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full transition-colors",
-                      p.road ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-500"
-                    )}>
-                      {p.road && <Zap className="w-2.5 h-2.5 fill-current" />}
-                      <span>{p.distancia < 1 ? `${(p.distancia * 1000).toFixed(0)}m` : `${p.distancia.toFixed(1)}km`}</span>
-                    </div>
-                  )}
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-4" onClick={() => onSelect(p)}>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 min-w-0" onClick={() => onSelect(p)}>
                   <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                   <span className="truncate">{p.endereco}</span>
                 </div>
