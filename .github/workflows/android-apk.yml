@@ -52,8 +52,19 @@ jobs:
           fi
 
           if [ ! -z "$ICON_SOURCE" ]; then
+            echo "Gerando ícones a partir de $ICON_SOURCE..."
             npm install @capacitor/assets --save-dev --legacy-peer-deps
-            npx @capacitor/assets generate --android --icon "$ICON_SOURCE" --splash "$ICON_SOURCE"
+            # Criar estrutura padrão que o gerador gosta
+            mkdir -p assets
+            cp "$ICON_SOURCE" assets/icon.png
+            cp "$ICON_SOURCE" assets/icon-only.png
+            cp "$ICON_SOURCE" assets/icon-foreground.png
+            cp "$ICON_SOURCE" assets/icon-background.png
+            cp "$ICON_SOURCE" assets/splash.png
+            cp "$ICON_SOURCE" assets/splash-dark.png
+            cp "$ICON_SOURCE" assets/logo.png
+            # Gerar sem flags de arquivo específicas para evitar erros de versão
+            npx @capacitor/assets generate --android
           fi
 
           # Injetar permissões de GPS e Clipboard no AndroidManifest.xml
