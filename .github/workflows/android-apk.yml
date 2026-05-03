@@ -43,11 +43,17 @@ jobs:
             npx cap add android
           fi
           
-          # Gerar ícones se o arquivo public/Icon.png existir e não estiver vazio
+          # Detectar arquivo de ícone (Icon.png ou icon.png)
+          ICON_SOURCE=""
           if [ -s "public/Icon.png" ]; then
-            cp public/Icon.png public/icon.png
+            ICON_SOURCE="public/Icon.png"
+          elif [ -s "public/icon.png" ]; then
+            ICON_SOURCE="public/icon.png"
+          fi
+
+          if [ ! -z "$ICON_SOURCE" ]; then
             npm install @capacitor/assets --save-dev --legacy-peer-deps
-            npx capacitor-assets generate --android
+            npx @capacitor/assets generate --android --icon "$ICON_SOURCE" --splash "$ICON_SOURCE"
           fi
 
           # Injetar permissões de GPS e Clipboard no AndroidManifest.xml
