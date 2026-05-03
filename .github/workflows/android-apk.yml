@@ -43,9 +43,10 @@ jobs:
             npx cap add android
           fi
           
-          # Gerar ícones se o arquivo public/icon.png existir
-          if [ -f "public/icon.png" ]; then
-            npm install @capacitor/assets --save-dev
+          # Gerar ícones se o arquivo public/Icon.png existir e não estiver vazio
+          if [ -s "public/Icon.png" ]; then
+            cp public/Icon.png public/icon.png
+            npm install @capacitor/assets --save-dev --legacy-peer-deps
             npx capacitor-assets generate --android
           fi
 

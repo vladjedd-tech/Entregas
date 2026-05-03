@@ -36,7 +36,7 @@ export async function geocodificarEndereco(enderecoOriginal: string): Promise<{ 
   const enderecoPuro = extrairEnderecoPuro(enderecoOriginal);
   const anchorLat = -26.2268;
   const anchorLng = -52.6713;
-  const cidadeEstado = "Pato Branco, PR";
+  const cidadeEstado = "Pato Branco, PR"; // Cidade base de operação
 
   // Motor 1: Photon (Extremamente tolerante a erros de digitação)
   const buscarPhoton = async (q: string) => {
@@ -92,7 +92,7 @@ export async function geocodificarEndereco(enderecoOriginal: string): Promise<{ 
       coords = await tentarTodos(`${enderecoPuro}`);
     }
 
-    // Fallback: Se NADA der certo, coloca no centro de Pato Branco para aparacer na lista/mapa
+    // Fallback: Se NADA der certo, coloca no centro da cidade para aparecer na lista/mapa
     if (!coords) {
       console.warn(`GPS não localizou: ${enderecoOriginal}. Usando centro da cidade.`);
       coords = { lat: anchorLat, lng: anchorLng };

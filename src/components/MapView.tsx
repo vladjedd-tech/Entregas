@@ -58,7 +58,7 @@ function MapController({
 }
 
 export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps) {
-  const defaultCenter: [number, number] = [-26.2238, -52.6719]; // Pato Branco center
+  const defaultCenter: [number, number] = [-26.2238, -52.6719]; // Centro de operação
   const [firstLegPath, setFirstLegPath] = useState<[number, number][]>([]);
   const [remainingPath, setRemainingPath] = useState<[number, number][]>([]);
   const [isRouting, setIsRouting] = useState(false);
@@ -137,7 +137,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
     const fetchRoute = async () => {
       setIsRouting(true);
       try {
-        // Perna 1: Pato Branco -> Próximo
+        // Perna 1: Início -> Próximo
         const leg1 = await getRoadRoute([waypoints[0], waypoints[1]]);
         
         // Perna Restante
