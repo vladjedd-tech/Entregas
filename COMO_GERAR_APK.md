@@ -11,6 +11,17 @@ Eu fiz melhorias críticas no GPS e no Mapa:
 
 **Para aplicar estas mudanças, você precisa clicar em "Export to GitHub" novamente e gerar um novo APK seguindo os passos da Opção 1.**
 
+Eu já configurei tudo para o novo nome **"Entregas Sexta Beer"** e corrigi o erro de compilação no GitHub (atualizado para Java 21).
+
+### Como colocar o ícone personalizado:
+1. Salve a imagem que você me enviou no seu computador.
+2. Renomeie ela para `icon.png`.
+3. Faça o upload dela para a pasta `public/` aqui no projeto.
+4. Clique em **"Export to GitHub"**.
+5. O sistema de build no GitHub vai detectar esse arquivo e gerar automaticamente todos os ícones para o APK.
+
+---
+
 ## Opção 1: Automático via GitHub (Recomendado)
 Eu já corrigi as versões do aplicativo e configurei o sistema para gerar o APK sozinho.
 Siga estes passos:
