@@ -46,9 +46,8 @@ export function OrderList({ pedidos, onSelect, onUpdateStatus }: OrderListProps)
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Bloco Fixo: Filtros e Busca */}
-      <div className="flex-none bg-gray-50 py-2 px-4 space-y-2 border-b border-gray-100 z-30">
+    <div className="flex flex-col">
+      <div className="sticky top-0 z-30 bg-gray-50/90 backdrop-blur-md px-4 py-3 space-y-3 border-b border-gray-100">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -56,7 +55,7 @@ export function OrderList({ pedidos, onSelect, onUpdateStatus }: OrderListProps)
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar por nome ou pedido..."
-            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl outline-none focus:ring-1 focus:ring-primary text-sm shadow-sm"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary shadow-sm"
           />
         </div>
 
@@ -66,22 +65,21 @@ export function OrderList({ pedidos, onSelect, onUpdateStatus }: OrderListProps)
               key={status}
               onClick={() => setFiltroStatus(status)}
               className={cn(
-                "whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold transition-all border uppercase tracking-wider",
+                "whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all border",
                 filtroStatus === status 
                   ? "bg-primary text-zinc-950 border-primary shadow-sm" 
                   : "bg-white text-gray-600 border-gray-200"
               )}
             >
-              {status === 'TODOS' ? 'Todos' : (status === 'EM_ENTREGA' ? 'Rota' : status.replace('_', ' '))}
+              {status === 'TODOS' ? 'Todos Ativos' : (status === 'EM_ENTREGA' ? 'Rota' : status.replace('_', ' '))}
               {status === 'TODOS' ? ` (${pedidos.filter(p => p.status !== 'ENTREGUE' && p.status !== 'CANCELADO').length})` : ` (${pedidos.filter(p => p.status === status).length})`}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Bloco Móvel: Lista de Pedidos */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 no-scrollbar">
-        <div className="px-1">
+      <div className="px-4 pt-6 pb-10 space-y-4">
+        <div className="px-1 mb-1">
           <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
             Lista de Pedidos ({filtrados.length})
           </h3>

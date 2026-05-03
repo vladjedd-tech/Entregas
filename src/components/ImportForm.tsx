@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { parsePedidos } from '../services/parseService';
 import { Pedido } from '../types';
 import { Save, ClipboardPaste } from 'lucide-react';
+import { Clipboard } from '@capacitor/clipboard';
 
 interface ImportFormProps {
   onImport: (pedidos: Pedido[]) => void;
@@ -26,10 +27,21 @@ export function ImportForm({ onImport }: ImportFormProps) {
 
   const handlePaste = async () => {
     try {
-      const clipText = await navigator.clipboard.readText();
+      let clipText = '';
+      try {
+        // Tentar via Plugin do Capacitor (Melhor para Android APK)
+        const result = await Clipboard.read();
+        clipText = result.value;
+      } catch (capErr) {
+        // Fallback para API do Navegador
+        clipText = await navigator.clipboard.readText();
+      }
+
       if (clipText) {
         setTexto(prev => prev ? prev + '\n' + clipText : clipText);
         setStatus(null);
+      } else {
+        setStatus('Clipboard vazio ou acesso negado.');
       }
     } catch (err) {
       console.error('Falha ao colar:', err);

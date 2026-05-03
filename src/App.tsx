@@ -203,7 +203,7 @@ export default function App() {
         )}
       </header>
 
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-x-hidden">
         <AnimatePresence mode="wait">
           {abaAtiva === 'importar' && (
             <motion.div
@@ -211,7 +211,7 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="p-4 h-full overflow-y-auto no-scrollbar"
+              className="p-4"
             >
               <ImportForm onImport={adicionarPedidos} />
             </motion.div>
@@ -223,7 +223,6 @@ export default function App() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="h-full"
             >
               <OrderList 
                 pedidos={pedidos} 
@@ -239,7 +238,6 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="h-full overflow-y-auto no-scrollbar"
             >
               <RouteView 
                 pedidos={pedidos} 
@@ -272,7 +270,6 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="h-full overflow-y-auto no-scrollbar"
             >
               <HistoryView pedidos={pedidos} />
             </motion.div>

@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.entregas.app',
-  appName: 'Entregas Pato Branco',
+  appName: 'Entregas Sexta Beer',
   webDir: 'dist'
 };
 

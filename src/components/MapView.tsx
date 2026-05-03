@@ -212,9 +212,9 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
         {remainingPath.length > 1 && (
           <Polyline 
             positions={remainingPath} 
-            color="#3b82f6" 
+            color="#2563eb" 
             weight={4} 
-            opacity={0.4}
+            opacity={0.7}
             dashArray="1, 12"
             lineCap="round"
           />

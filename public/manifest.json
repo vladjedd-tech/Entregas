@@ -1,6 +1,6 @@
 {
-  "short_name": "MotoboyApp",
-  "name": "Gerenciador de Entregas Motoboy",
+  "short_name": "SextaBeer",
+  "name": "Entregas Sexta Beer",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,7 +20,7 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#2563eb",
+  "theme_color": "#FFD700",
   "background_color": "#ffffff",
   "orientation": "portrait"
 }
