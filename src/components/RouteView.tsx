@@ -17,83 +17,40 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
   const [rotaOrdenada, setRotaOrdenada] = useState<(Pedido & { distancia?: number; road?: boolean })[]>([]);
   const [otimizando, setOtimizando] = useState(false);
 
-  // Efeito para calcular a melhor rota (Primeiro linha reta, depois via ruas)
+  // Efeito para calcular a rota (Sincronizado com o Mapa: Linha Reta)
   useEffect(() => {
     if (!posicaoAtual || emEntrega.length === 0) {
       setRotaOrdenada(emEntrega);
       return;
     }
 
-    let isMounted = true;
+    // Arredondamos a posição para evitar que ruídos de GPS (centímetros) causem re-ordenação constante
+    const currentLat = posicaoAtual ? Math.round(posicaoAtual.lat * 10000) / 10000 : 0;
+    const currentLng = posicaoAtual ? Math.round(posicaoAtual.lng * 10000) / 10000 : 0;
 
-    const calcularRota = async () => {
-      // 1. Cálculo Rápido (Linha Reta)
-      const itemsLinhareta = [...emEntrega];
-      let cLat = posicaoAtual.lat;
-      let cLng = posicaoAtual.lng;
-      const sortedLR: (Pedido & { distancia?: number; road?: boolean })[] = [];
+    const itemsLinhareta = [...emEntrega];
+    let cLat = currentLat;
+    let cLng = currentLng;
+    const sorted: (Pedido & { distancia?: number; road?: boolean })[] = [];
 
-      while (itemsLinhareta.length > 0) {
-        let closestIdx = 0;
-        let minDistance = Infinity;
-        for (let i = 0; i < itemsLinhareta.length; i++) {
-          const d = calcularDistancia(cLat, cLng, itemsLinhareta[i].latitude!, itemsLinhareta[i].longitude!);
-          if (d < minDistance) { minDistance = d; closestIdx = i; }
+    while (itemsLinhareta.length > 0) {
+      let closestIdx = 0;
+      let minDistance = Infinity;
+      for (let i = 0; i < itemsLinhareta.length; i++) {
+        const d = calcularDistancia(cLat, cLng, itemsLinhareta[i].latitude!, itemsLinhareta[i].longitude!);
+        if (d < minDistance) {
+          minDistance = d;
+          closestIdx = i;
         }
-        const [next] = itemsLinhareta.splice(closestIdx, 1);
-        sortedLR.push({ ...next, distancia: minDistance });
-        cLat = next.latitude!; cLng = next.longitude!;
       }
-      
-      if (isMounted) setRotaOrdenada(sortedLR);
-
-      // 2. Otimização Profunda (Via Ruas / OSRM)
-      // Fazemos isso apenas se tivermos uma quantidade razoável de pontos para não sobrecarregar
-      if (emEntrega.length > 0 && emEntrega.length <= 25) {
-        setOtimizando(true);
-        const points = [{ lat: posicaoAtual.lat, lng: posicaoAtual.lng }, ...emEntrega.map(p => ({ lat: p.latitude!, lng: p.longitude! }))];
-        const matrix = await getDistanceMatrix(points);
-
-        if (matrix && isMounted) {
-          const itemsEstrada = [...emEntrega];
-          const sortedRoad: (Pedido & { distancia?: number; road?: boolean })[] = [];
-          
-          let currentPointIdx = 0; // Índice na matriz (0 é a posição atual)
-          const visitedIdxs = new Set([0]);
-
-          while (sortedRoad.length < emEntrega.length) {
-            let nextPointIdx = -1;
-            let minD = Infinity;
-
-            for (let i = 1; i < points.length; i++) {
-              if (!visitedIdxs.has(i)) {
-                const d = matrix[currentPointIdx][i];
-                if (d < minD) { minD = d; nextPointIdx = i; }
-              }
-            }
-
-            if (nextPointIdx !== -1) {
-              visitedIdxs.add(nextPointIdx);
-              // O índice 'i' na matriz corresponde ao item em 'emEntrega' no índice 'i-1'
-              const pedido = itemsEstrada[nextPointIdx - 1];
-              sortedRoad.push({ ...pedido, distancia: minD, road: true });
-              currentPointIdx = nextPointIdx;
-            } else {
-              break;
-            }
-          }
-          
-          if (isMounted && sortedRoad.length === emEntrega.length) {
-            setRotaOrdenada(sortedRoad);
-          }
-        }
-        if (isMounted) setOtimizando(false);
-      }
-    };
-
-    calcularRota();
-    return () => { isMounted = false; };
-  }, [emEntrega, posicaoAtual]);
+      const [next] = itemsLinhareta.splice(closestIdx, 1);
+      sorted.push({ ...next, distancia: minDistance });
+      cLat = next.latitude!; 
+      cLng = next.longitude!;
+    }
+    
+    setRotaOrdenada(sorted);
+  }, [emEntrega, Math.round((posicaoAtual?.lat || 0) * 10000), Math.round((posicaoAtual?.lng || 0) * 10000)]);
 
   if (pedidos.length > 0 && emEntrega.length === 0) {
     return (
