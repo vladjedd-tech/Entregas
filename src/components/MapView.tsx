@@ -25,9 +25,9 @@ const createIcon = (color: string) => {
 
 const icons = {
   PENDENTE: createIcon('#f59e0b'), // Amarelo
-  EM_ENTREGA: createIcon('#3b82f6'), // Azul
+  EM_ENTREGA: createIcon('#FFD93D'), // Amarelo Sexta Beer
   ENTREGUE: createIcon('#10b981'), // Verde
-  USER: createIcon('#ef4444'), // Vermelho (Usuário)
+  USER: createIcon('#000000'), // Preto (Usuário/Entregador)
 };
 
 function MapController({ 
@@ -200,7 +200,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
                 <p className="text-[10px] text-gray-500 mb-2">{p.endereco}</p>
                 <button 
                   onClick={() => onSelectPedido(p)}
-                  className="w-full py-1.5 bg-blue-600 text-white text-[10px] font-bold rounded-lg"
+                  className="w-full py-1.5 bg-zinc-950 text-primary text-[10px] font-brand rounded-lg"
                 >
                   Ver Detalhes
                 </button>
@@ -214,7 +214,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
             positions={remainingPath} 
             color="#3b82f6" 
             weight={4} 
-            opacity={0.6}
+            opacity={0.4}
             dashArray="1, 12"
             lineCap="round"
           />
@@ -237,7 +237,7 @@ export function MapView({ pedidos, posicaoAtual, onSelectPedido }: MapViewProps)
           className={cn(
             "p-4 rounded-2xl shadow-xl border flex items-center justify-center transition-all active:scale-95",
             autoFocus 
-              ? "bg-blue-600 border-blue-500 text-white" 
+              ? "bg-primary border-primary-dark text-zinc-950" 
               : "bg-white/90 backdrop-blur border-gray-100 text-gray-600 hover:bg-white"
           )}
         >

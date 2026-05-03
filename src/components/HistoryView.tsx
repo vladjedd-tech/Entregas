@@ -26,12 +26,12 @@ export function HistoryView({ pedidos }: HistoryViewProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <span className="text-[10px] font-bold text-gray-400 uppercase">Entregues</span>
-            <p className="text-2xl font-black text-green-600">{entregues.length}</p>
+            <span className="text-[10px] font-bold text-gray-400 uppercase">Entregas</span>
+            <p className="text-2xl font-brand text-green-600">{entregues.length}</p>
           </div>
           <div className="space-y-1">
-            <span className="text-[10px] font-bold text-gray-400 uppercase">Total Bruto</span>
-            <p className="text-2xl font-black text-blue-600">{formatarBRL(totalFaturado)}</p>
+            <span className="text-[10px] font-bold text-gray-400 uppercase">Faturado</span>
+            <p className="text-2xl font-brand text-zinc-950">{formatarBRL(totalFaturado)}</p>
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@ export function HistoryView({ pedidos }: HistoryViewProps) {
                 </div>
                 <p className="text-[10px] text-gray-400 truncate">{p.endereco}</p>
               </div>
-              <div className="text-sm font-black text-gray-900">
+              <div className="text-sm font-brand text-zinc-950">
                 {formatarBRL(p.valor)}
               </div>
             </div>

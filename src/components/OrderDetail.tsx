@@ -40,8 +40,8 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
       >
         <div className="flex justify-between items-start mb-6 shrink-0">
           <div className="min-w-0 pr-4">
-            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest block mb-1">Pedido #{pedido.numeroPedido}</span>
-            <h2 className="text-xl font-black text-gray-900 leading-tight truncate">{pedido.nome}</h2>
+            <span className="text-[10px] font-black text-primary-dark uppercase tracking-widest block mb-1">Pedido #{pedido.numeroPedido}</span>
+            <h2 className="text-xl font-brand text-gray-900 leading-tight truncate">{pedido.nome}</h2>
           </div>
           <button onClick={onClose} className="p-2 bg-gray-100 rounded-full text-gray-500 active:bg-gray-200 transition-colors shrink-0">
             <X className="w-6 h-6" />
@@ -58,7 +58,10 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
                 className={cn(
                   "flex flex-col items-center p-2 rounded-xl border transition-all",
                   pedido.status === s 
-                    ? (s === 'CANCELADO' ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-100" : "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-100")
+                    ? (s === 'CANCELADO' ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-100" : 
+                       s === 'EM_ENTREGA' ? "bg-primary border-primary text-zinc-950 shadow-lg shadow-primary/20" :
+                       s === 'PENDENTE' ? "bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-100" :
+                       "bg-green-600 border-green-600 text-white shadow-lg shadow-green-100")
                     : "bg-white border-gray-100 text-gray-400"
                 )}
               >
@@ -76,7 +79,7 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
           <div className="space-y-4">
             <div className="p-4 bg-gray-50 rounded-2xl space-y-3">
               <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-primary-dark shrink-0 mt-0.5" />
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Endereço</label>
                   <p className="text-sm font-semibold text-gray-800">{pedido.endereco}</p>
@@ -84,7 +87,7 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
               </div>
 
               <div className="flex items-start gap-3">
-                <Phone className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                <Phone className="w-5 h-5 text-primary-dark shrink-0 mt-0.5" />
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Telefone</label>
                   <p className="text-sm font-semibold text-gray-800">{pedido.telefone || 'Não informado'}</p>
@@ -106,9 +109,9 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
               </div>
             </div>
 
-            <div className="p-4 bg-blue-50 rounded-2xl">
-              <label className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Total</label>
-              <p className="text-2xl font-black text-blue-600">{formatarBRL(pedido.valor)}</p>
+            <div className="p-4 bg-green-600 rounded-2xl shadow-xl shadow-green-100">
+              <label className="text-[10px] font-bold text-green-100 uppercase tracking-wider block mb-1">Total</label>
+              <p className="text-3xl font-brand text-white">{formatarBRL(pedido.valor)}</p>
             </div>
 
             {/* Itens do Pedido */}
@@ -118,32 +121,32 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
               )}
               
               {pedido.sabores && (
-                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100">
+                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <Pizza className="w-4 h-4 text-orange-500" />
-                    <label className="text-[10px] font-bold text-orange-600 uppercase tracking-wider">Sabores da Pizza</label>
+                    <Pizza className="w-4 h-4 text-primary-dark" />
+                    <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Sabores da Pizza</label>
                   </div>
-                  <p className="text-sm font-bold text-orange-900 whitespace-pre-line leading-tight">{pedido.sabores}</p>
+                  <p className="text-sm font-bold text-gray-900 whitespace-pre-line leading-tight">{pedido.sabores}</p>
                 </div>
               )}
 
               {pedido.itens && (
-                <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <Package className="w-4 h-4 text-indigo-500" />
-                    <label className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Adicionais / Ajustes</label>
+                    <Package className="w-4 h-4 text-primary-dark" />
+                    <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Adicionais / Ajustes</label>
                   </div>
-                  <p className="text-sm font-bold text-indigo-900 whitespace-pre-line leading-tight">{pedido.itens}</p>
+                  <p className="text-sm font-bold text-gray-900 whitespace-pre-line leading-tight">{pedido.itens}</p>
                 </div>
               )}
 
               {pedido.refrigerante && (
-                <div className="p-4 bg-cyan-50 rounded-2xl border border-cyan-100">
+                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
                   <div className="flex items-center gap-2 mb-2">
-                    <CupSoda className="w-4 h-4 text-cyan-500" />
-                    <label className="text-[10px] font-bold text-cyan-600 uppercase tracking-wider">Bebida</label>
+                    <CupSoda className="w-4 h-4 text-primary-dark" />
+                    <label className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Bebida</label>
                   </div>
-                  <p className="text-sm font-bold text-cyan-900 whitespace-pre-line leading-tight">{pedido.refrigerante}</p>
+                  <p className="text-sm font-bold text-gray-900 whitespace-pre-line leading-tight">{pedido.refrigerante}</p>
                 </div>
               )}
             </div>
@@ -164,14 +167,14 @@ export function OrderDetail({ pedido, onClose, onUpdateStatus }: OrderDetailProp
           <button
             onClick={abrirWhatsApp}
             disabled={!pedido.telefone}
-            className="flex items-center justify-center gap-2 py-4 bg-green-500 text-white rounded-2xl font-bold active:scale-95 transition-all text-sm shadow-lg shadow-green-100 disabled:opacity-50"
+            className="flex items-center justify-center gap-2 py-4 bg-green-600 text-white rounded-2xl font-brand active:scale-95 transition-all text-sm shadow-lg shadow-green-100 disabled:opacity-50"
           >
             <MessageCircle className="w-5 h-5" />
             WhatsApp
           </button>
           <button
             onClick={abrirMapa}
-            className="flex items-center justify-center gap-2 py-4 bg-blue-600 text-white rounded-2xl font-bold active:scale-95 transition-all text-sm shadow-lg shadow-blue-100"
+            className="flex items-center justify-center gap-2 py-4 bg-primary text-zinc-950 rounded-2xl font-brand active:scale-95 transition-all text-sm shadow-lg shadow-primary/20"
           >
             <ExternalLink className="w-5 h-5" />
             Ver Mapa

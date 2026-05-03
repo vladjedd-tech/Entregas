@@ -10,23 +10,30 @@ interface ImportFormProps {
 export function ImportForm({ onImport }: ImportFormProps) {
   const [texto, setTexto] = useState('');
 
+  const [status, setStatus] = useState<string | null>(null);
+
   const handleImport = () => {
     if (!texto.trim()) return;
     const pedidos = parsePedidos(texto);
     if (pedidos.length === 0) {
-      alert('Nenhum pedido válido encontrado no texto.');
+      setStatus('Nenhum pedido válido encontrado no texto.');
       return;
     }
     onImport(pedidos);
     setTexto('');
+    setStatus(null);
   };
 
   const handlePaste = async () => {
     try {
       const clipText = await navigator.clipboard.readText();
-      setTexto(clipText);
+      if (clipText) {
+        setTexto(prev => prev ? prev + '\n' + clipText : clipText);
+        setStatus(null);
+      }
     } catch (err) {
       console.error('Falha ao colar:', err);
+      setStatus('Erro ao colar: Use Ctrl+V (Cmd+V) no campo abaixo devido a restrições do navegador.');
     }
   };
 
@@ -37,7 +44,7 @@ export function ImportForm({ onImport }: ImportFormProps) {
           Cole os pedidos aqui:
           <button 
             onClick={handlePaste}
-            className="flex items-center gap-1 text-blue-500 font-medium active:scale-95 transition-transform"
+            className="flex items-center gap-1 text-primary-dark font-black active:scale-95 transition-transform"
           >
             <ClipboardPaste className="w-4 h-4" />
             Colar
@@ -47,20 +54,26 @@ export function ImportForm({ onImport }: ImportFormProps) {
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           placeholder="📦 Pedido #123..."
-          className="w-full h-80 p-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none text-sm font-mono shadow-sm"
+          className="w-full h-80 p-3 bg-white border border-gray-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none resize-none text-sm font-mono shadow-sm"
         />
       </div>
       
+      {status && (
+        <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-medium border border-red-100">
+          {status}
+        </div>
+      )}
+
       <button
         onClick={handleImport}
         disabled={!texto.trim()}
-        className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-200 disabled:bg-gray-300 disabled:shadow-none active:scale-[0.98] transition-all"
+        className="w-full py-4 bg-primary text-zinc-950 rounded-2xl font-brand text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:bg-gray-300 disabled:shadow-none active:scale-[0.98] transition-all"
       >
         <Save className="w-5 h-5" />
         Processar Pedidos
       </button>
 
-      <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 italic text-blue-700 text-xs">
+      <div className="bg-zinc-950 p-4 rounded-xl border border-zinc-800 italic text-primary text-[10px] font-medium uppercase tracking-widest">
         <p>Dica: Copie o texto completo com vários pedidos começando com "📦 Pedido" para extrair todos de uma vez.</p>
       </div>
     </div>

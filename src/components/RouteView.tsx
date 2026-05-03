@@ -55,13 +55,13 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
   if (pedidos.length > 0 && emEntrega.length === 0) {
     return (
       <div className="p-8 text-center flex flex-col items-center justify-center space-y-6 pt-20">
-        <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 animate-pulse">
+        <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center text-primary-dark animate-pulse">
            <Package className="w-10 h-10" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-gray-900">Roda vazia</h3>
+          <h3 className="text-xl font-bold text-gray-900">Rota vazia</h3>
           <p className="text-gray-500 text-sm max-w-[240px] mx-auto">
-            Vá na aba <span className="font-bold text-blue-600">Pedidos</span> e marque alguns como "EM ENTREGA" para iniciar sua rota.
+            Vá na aba <span className="font-bold text-primary-dark">Pedidos</span> e marque alguns como "EM ENTREGA" para iniciar sua rota.
           </p>
         </div>
       </div>
@@ -81,13 +81,13 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
 
   return (
     <div className="p-4 space-y-6 w-full max-w-full">
-      <div className="flex justify-between items-center bg-blue-600 p-6 rounded-[32px] text-white shadow-xl shadow-blue-200">
+      <div className="flex justify-between items-center bg-zinc-950 p-6 rounded-[32px] text-white shadow-xl shadow-gray-200">
         <div className="min-w-0 flex-1">
-          <h2 className="text-2xl font-black mb-1 truncate">Minha Rota</h2>
-          <p className="text-blue-100 text-[10px] font-medium uppercase tracking-widest">{rotaOrdenada.length} entregas pendentes</p>
+          <h2 className="text-2xl font-brand text-primary mb-1 truncate">Minha Rota</h2>
+          <p className="text-zinc-400 text-[10px] font-medium uppercase tracking-widest">{rotaOrdenada.length} entregas pendentes</p>
         </div>
-        <div className="p-3 bg-blue-500 rounded-2xl rotate-3 shrink-0 ml-2">
-          <Navigation2 className="w-6 h-6 fill-white" />
+        <div className="p-3 bg-primary rounded-2xl rotate-3 shrink-0 ml-2 shadow-lg shadow-primary/20">
+          <Navigation2 className="w-6 h-6 text-zinc-950 fill-zinc-950" />
         </div>
       </div>
 
@@ -109,7 +109,7 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
             
             <div className="relative z-10 flex gap-4">
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-white border-2 border-blue-600 rounded-2xl flex items-center justify-center font-black text-blue-600 text-lg shadow-sm">
+                <div className="w-12 h-12 bg-primary border-2 border-zinc-900 rounded-2xl flex items-center justify-center font-brand text-zinc-950 text-xl shadow-sm">
                   {idx + 1}
                 </div>
               </div>
@@ -125,7 +125,7 @@ export function RouteView({ pedidos, posicaoAtual, onSelect, onUpdateStatus }: R
                 </div>
 
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 min-w-0" onClick={() => onSelect(p)}>
-                  <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <MapPin className="w-3.5 h-3.5 text-primary-dark shrink-0" />
                   <span className="truncate">{p.endereco}</span>
                 </div>
 

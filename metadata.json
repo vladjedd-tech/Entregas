@@ -2,7 +2,9 @@
   "name": "Entregas Pato Branco",
   "description": "Aplicativo mobile-first para gestão de entregas com mapeamento e roteirização baseada em GPS.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "clipboard-read",
+    "clipboard-write"
   ],
   "majorCapabilities": []
 }

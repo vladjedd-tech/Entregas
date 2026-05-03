@@ -160,13 +160,16 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-gray-50 pb-[70px]">
-      <header className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center h-[60px]">
+      <header className="sticky top-0 z-40 bg-zinc-950 border-b border-zinc-800 px-4 py-3 flex justify-between items-center h-[70px]">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-blue-600">Entregas Sexta Beer</h1>
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-brand text-primary leading-none tracking-wider">SEXTA</h1>
+            <h1 className="text-2xl font-brand text-white leading-none tracking-wider -mt-1">BEER</h1>
+          </div>
           {geocodificando && (
-            <div className="flex items-center gap-1.5 bg-blue-50 px-2 py-0.5 rounded-full animate-pulse">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
-              <span className="text-[10px] font-black text-blue-600 uppercase">Mapeando...</span>
+            <div className="flex items-center gap-1.5 bg-zinc-800 px-2 py-0.5 rounded-full animate-pulse ml-2">
+              <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
+              <span className="text-[10px] font-black text-primary uppercase">Mapeando...</span>
             </div>
           )}
         </div>
@@ -178,7 +181,7 @@ export default function App() {
               "text-[10px] font-black px-3 py-1.5 rounded-lg active:scale-95 transition-all uppercase whitespace-nowrap",
               confirmandoLimpeza 
                 ? "bg-red-600 text-white animate-pulse" 
-                : "bg-red-50 text-red-600"
+                : "bg-zinc-800 text-red-500"
             )}
           >
             {confirmandoLimpeza ? 'Confirmar?' : 'Limpar Pedidos'}
@@ -200,7 +203,7 @@ export default function App() {
         )}
       </header>
 
-      <main className="flex-1 overflow-x-hidden">
+      <main className="flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {abaAtiva === 'importar' && (
             <motion.div
@@ -208,7 +211,7 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="p-4"
+              className="p-4 h-full overflow-y-auto no-scrollbar"
             >
               <ImportForm onImport={adicionarPedidos} />
             </motion.div>
@@ -220,6 +223,7 @@ export default function App() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
+              className="h-full"
             >
               <OrderList 
                 pedidos={pedidos} 
@@ -235,6 +239,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
+              className="h-full overflow-y-auto no-scrollbar"
             >
               <RouteView 
                 pedidos={pedidos} 
@@ -251,7 +256,7 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="h-[calc(100vh-135px)]"
+              className="h-[calc(100vh-140px)]"
             >
               <MapView 
                 pedidos={pedidos} 
@@ -267,6 +272,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
+              className="h-full overflow-y-auto no-scrollbar"
             >
               <HistoryView pedidos={pedidos} />
             </motion.div>

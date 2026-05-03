@@ -16,7 +16,7 @@ export function BottomNav({ abaAtiva, setAbaAtiva }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-1 flex justify-around items-center z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-zinc-950 border-t border-zinc-900 px-2 py-1 flex justify-around items-center z-50">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -24,8 +24,8 @@ export function BottomNav({ abaAtiva, setAbaAtiva }: BottomNavProps) {
           className={cn(
             "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200",
             abaAtiva === tab.id 
-              ? "text-blue-600 bg-blue-50" 
-              : "text-gray-500 active:bg-gray-100"
+              ? "text-primary bg-zinc-900" 
+              : "text-zinc-500 active:bg-zinc-900"
           )}
         >
           <tab.icon className={cn("w-6 h-6", abaAtiva === tab.id && "scale-110")} />
